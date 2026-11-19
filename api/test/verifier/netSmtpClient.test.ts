@@ -34,7 +34,7 @@ describe('NetSmtpClient (local fake server, no external network)', () => {
         }
       });
     });
-    const conn = await new NetSmtpClient().connect('127.0.0.1', port, 2000);
+    const conn = await new NetSmtpClient({ allowPrivateAddresses: true }).connect('127.0.0.1', port, 2000);
     expect(conn.greeting).toEqual({ code: 220, message: 'test ESMTP' });
     const out = await probeRecipient(conn, { heloDomain: 'me.test', mailFrom: 'v@me.test', rcpt: 'x@example.com' });
     expect(out).toMatchObject({ status: 'undeliverable', code: 550 });
@@ -44,13 +44,13 @@ describe('NetSmtpClient (local fake server, no external network)', () => {
 
   it('times out when the server never sends a banner', async () => {
     const port = await listen(() => undefined);
-    await expect(new NetSmtpClient().connect('127.0.0.1', port, 150)).rejects.toThrow();
+    await expect(new NetSmtpClient({ allowPrivateAddresses: true }).connect('127.0.0.1', port, 150)).rejects.toThrow();
   });
 
   it('rejects when nothing is listening', async () => {
     const port = await listen(() => undefined);
     await new Promise<void>((r) => server!.close(() => r()));
     server = undefined;
-    await expect(new NetSmtpClient().connect('127.0.0.1', port, 1000)).rejects.toThrow();
+    await expect(new NetSmtpClient({ allowPrivateAddresses: true }).connect('127.0.0.1', port, 1000)).rejects.toThrow();
   });
 });

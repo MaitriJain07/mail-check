@@ -1,4 +1,6 @@
+import dns from 'node:dns';
 import net from 'node:net';
+import { isPrivateAddress } from './netGuard';
 import type { SmtpClient, SmtpConnection, SmtpReply } from './types';
 
 /**
@@ -70,10 +72,33 @@ class NetSmtpConnection implements SmtpConnection {
   }
 }
 
+export interface NetSmtpClientOptions {
+  /** Tests talk to a fake server on 127.0.0.1; production must leave this false. */
+  allowPrivateAddresses?: boolean;
+}
+
 export class NetSmtpClient implements SmtpClient {
+  constructor(private readonly options: NetSmtpClientOptions = {}) {}
+
+  /** DNS lookup that refuses private targets, so a hostile MX record cannot aim us at internal services. */
+  private guardedLookup: net.LookupFunction = (hostname, opts, callback) => {
+    dns.lookup(hostname, opts, (err, address, family) => {
+      if (err) return callback(err, address as never, family as never);
+      const list = Array.isArray(address) ? address.map((a) => a.address) : [address as string];
+      if (list.some(isPrivateAddress)) {
+        return callback(Object.assign(new Error('Refusing to connect to a private or reserved address'), { code: 'EBLOCKED' }), '', 4);
+      }
+      callback(null, address as never, family as never);
+    });
+  };
+
   connect(host: string, port: number, timeoutMs: number): Promise<SmtpConnection> {
     return new Promise((resolve, reject) => {
-      const socket = net.createConnection({ host, port });
+      // IP literals skip DNS entirely, so they are checked directly.
+      if (!this.options.allowPrivateAddresses && net.isIP(host) && isPrivateAddress(host)) {
+        return reject(Object.assign(new Error('Refusing to connect to a private or reserved address'), { code: 'EBLOCKED' }));
+      }
+      const socket = net.createConnection({ host, port, ...(this.options.allowPrivateAddresses ? {} : { lookup: this.guardedLookup }) });
       const deadline = setTimeout(() => {
         socket.destroy(new Error(`SMTP timed out after ${timeoutMs}ms`));
       }, timeoutMs);

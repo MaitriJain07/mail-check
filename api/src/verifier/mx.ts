@@ -10,6 +10,7 @@ export interface MxLookupOptions {
   now?: () => number;
 }
 
+const MAX_CACHE_ENTRIES = 10_000;
 const NOT_FOUND_CODES = new Set(['ENOTFOUND', 'ENODATA', 'NXDOMAIN']);
 
 const defaultResolver: MxResolver = (domain) => dns.promises.resolveMx(domain);
@@ -51,7 +52,11 @@ export function createMxLookup(opts: MxLookupOptions): MxLookup {
       else return { status: 'error', message: (err as Error).message };
     }
 
-    if (opts.ttlMs > 0) cache.set(key, { value, expires: now() + opts.ttlMs });
+    if (opts.ttlMs > 0) {
+      // Bounded: attacker-chosen domains must not be able to grow memory without limit.
+      if (cache.size >= MAX_CACHE_ENTRIES) cache.delete(cache.keys().next().value as string);
+      cache.set(key, { value, expires: now() + opts.ttlMs });
+    }
     return value;
   };
 }
