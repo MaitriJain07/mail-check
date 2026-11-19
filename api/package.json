@@ -16,7 +16,8 @@
     "seed": "tsx src/scripts/seed.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "migrate:prod": "node dist/scripts/migrate.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

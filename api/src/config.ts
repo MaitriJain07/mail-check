@@ -34,6 +34,8 @@ const schema = z.object({
   SMTP_MAIL_FROM: z.string().default('verify@mailcheck.local'),
   DNS_TIMEOUT_MS: z.coerce.number().int().positive().default(5000),
   MX_CACHE_TTL_SECONDS: z.coerce.number().int().nonnegative().default(300),
+  // Run the bulk worker inside the API process (for single-service free hosting). Off by default.
+  EMBED_WORKER: bool.default(false),
   BULK_MAX_ROWS: z.coerce.number().int().positive().default(1000),
   WORKER_CONCURRENCY: z.coerce.number().int().positive().default(10),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(1000),

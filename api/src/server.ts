@@ -3,9 +3,15 @@ import { config } from './config';
 import { createPool } from './db/pool';
 import { logger } from './logger';
 import { createDefaultVerifier } from './verifier/default';
+import { createWorker } from './worker/runner';
 
 const db = createPool();
-const app = createApp({ db, config, verifier: createDefaultVerifier(config) });
+const verifier = createDefaultVerifier(config);
+const app = createApp({ db, config, verifier });
+
+// Optional: host the bulk worker in this process (the standalone `npm run worker` entry is the default).
+const embedded = config.EMBED_WORKER ? createWorker({ db, config, verifier, log: logger }) : null;
+void embedded?.start().catch((err) => logger.error({ err }, 'embedded worker crashed'));
 
 const server = app.listen(config.PORT, () => {
   logger.info(
@@ -27,6 +33,7 @@ async function shutdown(signal: string): Promise<void> {
   force.unref();
 
   server.close(async () => {
+    await embedded?.stop();
     await db.end().catch(() => undefined);
     logger.info('bye');
     process.exit(0);
