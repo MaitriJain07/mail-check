@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import mysql from 'mysql2/promise';
+import { config } from '../config';
 
 const MIGRATIONS_DIR = path.resolve(__dirname, '..', '..', 'migrations');
 
@@ -9,7 +10,11 @@ const MIGRATIONS_DIR = path.resolve(__dirname, '..', '..', 'migrations');
  * schema_migrations. A named lock stops two processes migrating at once.
  */
 export async function runMigrations(url: string, log: (msg: string) => void = () => undefined): Promise<string[]> {
-  const conn = await mysql.createConnection({ uri: url, multipleStatements: true });
+  const conn = await mysql.createConnection({
+    uri: url,
+    multipleStatements: true,
+    ...(config.DB_SSL ? { ssl: { rejectUnauthorized: false } } : {}),
+  });
   const applied: string[] = [];
   try {
     await conn.query('SELECT GET_LOCK("mailcheck_migrate", 30)');

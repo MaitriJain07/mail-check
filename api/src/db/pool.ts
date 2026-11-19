@@ -7,6 +7,7 @@ export type Conn = PoolConnection;
 export function createPool(url = config.DATABASE_URL, size = config.DB_POOL_SIZE): Pool {
   const pool = mysql.createPool({
     uri: url,
+    ...(config.DB_SSL ? { ssl: { rejectUnauthorized: false } } : {}),
     connectionLimit: size,
     timezone: 'Z',
     dateStrings: false,

@@ -102,6 +102,7 @@ All of them live in [.env.example](.env.example). One `.env` at the repo root se
 | `DATABASE_URL` | `mysql://mailcheck:mailcheck@localhost:3307/mailcheck` | MySQL connection string |
 | `TEST_DATABASE_URL` | `...:3307/mailcheck_test` | Used only by `npm test` |
 | `DB_POOL_SIZE` | `10` | Connection pool size |
+| `DB_SSL` | `false` | Enable TLS for managed MySQL (Aiven, TiDB, ...) |
 | `JWT_SECRET` | *(required)* | Signs dashboard tokens; 16+ chars |
 | `JWT_EXPIRES_IN` | `7d` | Token lifetime |
 | `BCRYPT_ROUNDS` | `10` | bcrypt cost |
@@ -238,7 +239,7 @@ Rate-limited requests get `429` with `Retry-After`, and every verification respo
 
 Free-tier terms change often and I have not re-verified them: check each provider's current limits before relying on this. Two things to know up front: free web services usually sleep when idle (the first request after a pause is slow), and a free always-on *background worker* is often not offered, which is what `EMBED_WORKER=true` is for.
 
-- [ ] **MySQL.** Create a free MySQL database on Aiven or TiDB Cloud. Copy its connection string (add `?ssl=...` options if the provider requires TLS) and create an empty database for MailCheck.
+- [ ] **MySQL.** Create a free MySQL database on Aiven or TiDB Cloud. Copy its connection string, set `DB_SSL=true` (managed MySQL requires TLS) and create an empty database for MailCheck.
 - [ ] **Migrations.** Run automatically by the start command below (they are idempotent). To seed demo data from your machine: `DATABASE_URL="<hosted url>" npm run seed`.
 - [ ] **API on Render or Railway.** Leave the root directory at the repo root. Build command: `npm ci --include=dev && npm run build -w api` (`--include=dev` because `tsc` is a dev dependency). Start command: `npm run migrate:prod -w api && npm start -w api`. Health check path: `/health`.
 - [ ] **API environment.** `NODE_ENV=production`, `DATABASE_URL`, `JWT_SECRET` (long random), `CORS_ORIGINS=https://<your-vercel-app>.vercel.app`, `TRUST_PROXY=1`, `SMTP_CHECK_ENABLED=false` (hosts block port 25).

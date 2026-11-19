@@ -21,6 +21,8 @@ const schema = z.object({
   TRUST_PROXY: z.coerce.number().int().nonnegative().default(0),
   DATABASE_URL: z.string().default('mysql://mailcheck:mailcheck@localhost:3307/mailcheck'),
   DB_POOL_SIZE: z.coerce.number().int().positive().default(10),
+  // Managed MySQL (Aiven, TiDB, PlanetScale...) requires TLS. Set true to enable it.
+  DB_SSL: bool.default(false),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(15).default(10),
