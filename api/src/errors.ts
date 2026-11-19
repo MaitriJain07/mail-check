@@ -16,7 +16,10 @@ export const Errors = {
   badRequest: (message: string, details?: unknown) => new ApiError(400, 'bad_request', message, details),
   validation: (details: unknown) => new ApiError(400, 'validation_error', 'Request validation failed', details),
   unauthorized: (message = 'Authentication required') => new ApiError(401, 'unauthorized', message),
-  paymentRequired: (message = 'Out of credits') => new ApiError(402, 'insufficient_credits', message),
+  paymentRequired: (message = 'Out of credits', details?: unknown) =>
+    new ApiError(402, 'insufficient_credits', message, details ?? null),
+  tooManyRows: (count: number, max: number) =>
+    new ApiError(413, 'too_many_rows', 'Too many rows: ' + count + ' (max ' + max + ')', { count, max }),
   forbidden: (message = 'Forbidden') => new ApiError(403, 'forbidden', message),
   notFound: (message = 'Not found') => new ApiError(404, 'not_found', message),
   conflict: (message: string) => new ApiError(409, 'conflict', message),

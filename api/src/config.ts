@@ -39,6 +39,7 @@ const schema = z.object({
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(1000),
   DOMAIN_THROTTLE_MS: z.coerce.number().int().nonnegative().default(250),
   WORKER_LOCK_SECONDS: z.coerce.number().int().positive().default(60),
+  BULK_RETRY_DELAY_SECONDS: z.coerce.number().int().nonnegative().default(2),
   BULK_MAX_ATTEMPTS: z.coerce.number().int().positive().default(3),
 });
 

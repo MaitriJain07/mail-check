@@ -25,6 +25,7 @@ export default defineConfig({
       FREE_CREDITS: '100',
       RATE_LIMIT_MAX: '60',
       DOMAIN_THROTTLE_MS: '0',
+      BULK_RETRY_DELAY_SECONDS: '0',
       WORKER_POLL_INTERVAL_MS: '20',
     },
     // Integration tests share one MySQL database, so run files one at a time.

@@ -7,6 +7,7 @@ import { authenticate } from './middleware/auth';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { bucketForAuth, bucketForIp, rateLimit } from './middleware/rateLimit';
 import { requestId } from './middleware/requestId';
+import { bulkRoutes } from './routes/bulk';
 import { authRoutes } from './routes/auth';
 import { keyRoutes } from './routes/keys';
 import { usageRoutes } from './routes/usage';
@@ -46,7 +47,7 @@ export function createApp(deps: AppDeps): Express {
       maxAge: 600,
     }),
   );
-  app.use(express.json({ limit: '1mb' }));
+  app.use(express.json({ limit: '5mb' }));
 
   const limiter = createRateLimiter(db);
   const auth = authenticate(db, config);
@@ -82,6 +83,7 @@ export function createApp(deps: AppDeps): Express {
   app.use('/v1/auth', authRoutes(deps, auth, authLimit));
   app.use('/v1/keys', keyRoutes(deps, auth));
   app.use('/v1/usage', usageRoutes(deps, auth));
+  app.use('/v1/bulk', bulkRoutes(deps, auth, perKey));
   app.use('/v1/demo', demoRoutes(deps, demoLimit));
   app.use('/v1', verifyRoutes(deps, auth, perKey));
 
