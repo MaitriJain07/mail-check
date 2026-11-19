@@ -1,0 +1,27 @@
+{
+  "name": "mailcheck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MailCheck: email verification API and dashboard",
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "migrate": "npm run migrate -w api",
+    "seed": "npm run seed -w api",
+    "dev": "npm run migrate -w api && concurrently -n api,worker,web -c blue,magenta,green \"npm:dev -w api\" \"npm:worker:dev -w api\" \"npm:dev -w web\"",
+    "build": "npm run build -w api && npm run build -w web",
+    "lint": "npm run lint -w api && npm run lint -w web",
+    "typecheck": "npm run typecheck -w api && npm run typecheck -w web",
+    "test": "npm run test -w api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
