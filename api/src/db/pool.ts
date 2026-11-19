@@ -5,7 +5,7 @@ export type Db = Pool;
 export type Conn = PoolConnection;
 
 export function createPool(url = config.DATABASE_URL, size = config.DB_POOL_SIZE): Pool {
-  return mysql.createPool({
+  const pool = mysql.createPool({
     uri: url,
     connectionLimit: size,
     timezone: 'Z',
@@ -16,6 +16,11 @@ export function createPool(url = config.DATABASE_URL, size = config.DB_POOL_SIZE
     decimalNumbers: true,
     namedPlaceholders: false,
   });
+  // Pin every session to UTC so NOW(), DATE_FORMAT() and our JS date math agree on any host.
+  pool.on('connection', (conn) => {
+    conn.query("SET time_zone = '+00:00'");
+  });
+  return pool;
 }
 
 export { ResultSetHeader, RowDataPacket };

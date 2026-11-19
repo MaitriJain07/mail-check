@@ -17,6 +17,8 @@ const schema = z.object({
   PORT: z.coerce.number().int().default(4000),
   LOG_LEVEL: z.string().default('info'),
   CORS_ORIGINS: z.string().default('http://localhost:3000'),
+  // Number of reverse proxies in front of the API (Render/Railway = 1), so req.ip is the real client.
+  TRUST_PROXY: z.coerce.number().int().nonnegative().default(0),
   DATABASE_URL: z.string().default('mysql://mailcheck:mailcheck@localhost:3307/mailcheck'),
   DB_POOL_SIZE: z.coerce.number().int().positive().default(10),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
