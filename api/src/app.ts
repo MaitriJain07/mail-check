@@ -2,6 +2,8 @@ import cors from 'cors';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
+import swaggerUi from 'swagger-ui-express';
+import { openApiSpec } from './openapi';
 import { logger } from './logger';
 import { authenticate } from './middleware/auth';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
@@ -79,6 +81,9 @@ export function createApp(deps: AppDeps): Express {
       res.status(503).json({ status: 'degraded', db: 'down' });
     }
   });
+
+  app.get('/openapi.json', (_req, res) => void res.json(openApiSpec));
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec as object, { customSiteTitle: 'MailCheck API docs' }));
 
   app.use('/v1/auth', authRoutes(deps, auth, authLimit));
   app.use('/v1/keys', keyRoutes(deps, auth));
