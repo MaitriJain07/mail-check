@@ -207,7 +207,7 @@ Rate-limited requests get `429` with `Retry-After`, and every verification respo
 
 ## Testing
 
-139 tests in Vitest: unit tests for every verifier step (with the fake SMTP client, plus the real `net` client against a local fake server) and integration tests for auth, API keys, rate limiting, credit decrement under concurrency (including 40 simultaneous charges against 5 credits), and the whole bulk lifecycle (restart survival, parallel workers, retries, lease recovery, running out of credits mid-job). GitHub Actions runs install, lint, typecheck, test and build on every push, with a MySQL service container and no outbound network.
+166 tests in Vitest: unit tests for every verifier step (with the fake SMTP client, plus the real `net` client against a local fake server) and integration tests for auth, API keys, rate limiting, credit decrement under concurrency (including 40 simultaneous charges against 5 credits), and the whole bulk lifecycle (restart survival, parallel workers, retries, lease recovery, running out of credits mid-job). GitHub Actions runs install, lint, typecheck, test and build on every push, with a MySQL service container and no outbound network.
 
 ## Known limitations
 
@@ -221,6 +221,7 @@ Rate-limited requests get `429` with `Retry-After`, and every verification respo
 - JWT in `localStorage` is exposed to XSS; httpOnly cookies would be stronger but need CSRF handling and same-site hosting.
 - No email confirmation, password reset, billing or top-ups: credits are a counter only.
 - Bulk jobs are capped (`BULK_MAX_ROWS`, 1000 by default) and run one result at a time per item; there is no job list or cancel.
+- On Windows with Docker Desktop, the forwarded MySQL port occasionally drops new connections under bursts, so a concurrency test can fail with `connect ETIMEDOUT` (about 1 run in 6 on my machine; the test pool is pre-warmed to reduce this). Re-run if you see it. Clean Linux runs, as in CI, did not show it.
 - Lighthouse (production build, local): mobile performance 93 under simulated throttling, 100 on desktop; accessibility, best practices and SEO 100. Numbers will vary by machine.
 
 ## What I'd do next

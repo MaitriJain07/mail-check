@@ -51,7 +51,19 @@ export function createCtx(env: Record<string, string> = {}, verifier: Verifier =
   return { db, config, app, verifier };
 }
 
+/**
+ * Open the pool's connections one at a time up front. The concurrency tests would otherwise
+ * open ~20 new TCP connections in the same instant, which can hit connect timeouts on hosts
+ * with a flaky forwarded MySQL port (e.g. Docker Desktop on Windows).
+ */
+export async function warmPool(db: Db, size = 12): Promise<void> {
+  const held = [];
+  for (let i = 0; i < size; i++) held.push(await db.getConnection());
+  for (const c of held) c.release();
+}
+
 export async function resetDb(db: Db): Promise<void> {
+  await warmPool(db);
   await db.query('SET FOREIGN_KEY_CHECKS = 0');
   for (const t of ['bulk_items', 'bulk_jobs', 'usage_events', 'rate_limits', 'api_keys', 'users']) {
     await db.query(`TRUNCATE TABLE ${t}`);

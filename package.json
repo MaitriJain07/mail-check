@@ -19,7 +19,7 @@
     "build": "npm run build -w api && npm run build -w web",
     "lint": "npm run lint -w api && npm run lint -w web",
     "typecheck": "npm run typecheck -w api && npm run typecheck -w web",
-    "test": "npm run test -w api"
+    "test": "cd api && npm test"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
