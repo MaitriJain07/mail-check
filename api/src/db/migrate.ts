@@ -17,7 +17,7 @@ export async function runMigrations(url: string, log: (msg: string) => void = ()
   });
   const applied: string[] = [];
   try {
-    await conn.query('SELECT GET_LOCK("mailcheck_migrate", 30)');
+    await conn.query("SELECT GET_LOCK('mailcheck_migrate', 30)");
     await conn.query(`CREATE TABLE IF NOT EXISTS schema_migrations (
       name VARCHAR(255) NOT NULL PRIMARY KEY,
       applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -32,7 +32,7 @@ export async function runMigrations(url: string, log: (msg: string) => void = ()
       await conn.query('INSERT INTO schema_migrations (name) VALUES (?)', [file]);
       applied.push(file);
     }
-    await conn.query('SELECT RELEASE_LOCK("mailcheck_migrate")');
+    await conn.query("SELECT RELEASE_LOCK('mailcheck_migrate')");
   } finally {
     await conn.end();
   }
